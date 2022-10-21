@@ -152,7 +152,10 @@ local config = {
       },
       disabled = { -- disable formatting capabilities for the listed language servers
         "intelephense",
+        "phpactor",
+        "tsserver",
       },
+      -- Increase the timeout for slow "language servers" like php-cs-fixer
       timeout_ms = 5000, -- default format timeout
       -- filter = function(client) -- fully override the default formatting function
       --   return true
@@ -163,9 +166,11 @@ local config = {
       n = {
         -- ["<leader>lf"] = false -- disable formatting keymap
       },
-      i = {
-        ["<C-Cr>"] = { "copilot#Accept(<Tab>)", silent = true, expr = true, script = true },
-      },
+
+      -- Moved this mapping to the polish() function to avoid issues with strange 80D characters
+      -- i = {
+      --   ["<C-Cr>"] = { "copilot#Accept(<Tab>)", silent = true, expr = true, script = true },
+      -- },
     },
     -- add to the global LSP on_attach function
     -- on_attach = function(client, bufnr)
@@ -262,7 +267,8 @@ local config = {
       return config -- return final config table
     end,
     treesitter = { -- overrides `require("treesitter").setup(...)`
-      -- ensure_installed = { "lua" },
+      ensure_installed = { "lua" },
+      indent = { enable = true },
     },
     -- use mason-lspconfig to configure LSP installations
     ["mason-lspconfig"] = { -- overrides `require("mason-lspconfig").setup(...)`
@@ -280,7 +286,7 @@ local config = {
     vscode_snippet_paths = {},
     -- Extend filetypes
     filetype_extend = {
-      -- javascript = { "javascriptreact" },
+      javascript = { "javascriptreact" },
     },
   },
 
@@ -320,17 +326,24 @@ local config = {
   -- anything that doesn't fit in the normal config locations above can go here
   polish = function()
     -- Set up custom filetypes
-    -- vim.filetype.add {
-    --   extension = {
-    --     foo = "fooscript",
-    --   },
-    --   filename = {
-    --     ["Foofile"] = "fooscript",
-    --   },
-    --   pattern = {
-    --     ["~/%.config/foo/.*"] = "fooscript",
-    --   },
-    -- }
+    -- Enable Astro syntax highlighting
+    vim.filetype.add {
+      extension = {
+        astro = "astro",
+      },
+      --   extension = {
+      --     foo = "fooscript",
+      --   },
+      --   filename = {
+      --     ["Foofile"] = "fooscript",
+      --   },
+      --   pattern = {
+      --     ["~/%.config/foo/.*"] = "fooscript",
+      --   },
+    }
+    -- Set up Copilot keybindings
+    local copilot_options = { silent = true, expr = true, script = true }
+    vim.api.nvim_set_keymap("i", "<C-cr>", "copilot#Accept(<Tab>)", copilot_options)
   end,
 }
 
